@@ -1,0 +1,49 @@
+name: Publicar versoes PromoAgenda
+on:
+  push:
+    paths:
+      - 'release/version.txt'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar versao e montar pacotes
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '\r\n' < release/version.txt)"
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          base64 --decode release/PromoAgenda-1.base64 > PromoAgenda-1.zip
+          base64 --decode release/PromoAgenda-2.base64 > PromoAgenda-2.zip
+          unzip -tq PromoAgenda-1.zip
+          unzip -tq PromoAgenda-2.zip
+          ! unzip -Z1 PromoAgenda-1.zip | grep -E '(^|/)(\.env|baileys-auth|data)(/|$)'
+          ! unzip -Z1 PromoAgenda-2.zip | grep -E '(^|/)(\.env|baileys-auth|data)(/|$)'
+          test "$(unzip -p PromoAgenda-1.zip server/version.json | jq -r '.version')" = "$VERSION"
+          test "$(unzip -p PromoAgenda-2.zip promoagenda2/version.json | jq -r '.version')" = "$VERSION"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+      - name: Criar release e publicar ZIPs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="v$VERSION"
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "PromoAgenda $TAG" --notes "Atualizacao para PromoAgenda 1 e 2. Faça backup antes de instalar." --latest
+          gh release upload "$TAG" PromoAgenda-1.zip PromoAgenda-2.zip --clobber
+      - name: Atualizar canal estavel
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHA1="$(sha256sum PromoAgenda-1.zip | cut -d' ' -f1)"
+          SHA2="$(sha256sum PromoAgenda-2.zip | cut -d' ' -f1)"
+          jq -n --arg v "$VERSION" --arg tag "v$VERSION" --arg s1 "$SHA1" --arg s2 "$SHA2" '{schema:1,version:$v,tag:$tag,apps:{"1":{asset:"PromoAgenda-1.zip",sha256:$s1},"2":{asset:"PromoAgenda-2.zip",sha256:$s2}}}' > updates/channel.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add updates/channel.json
+          git commit -m "Publicar canal estavel $VERSION" || exit 0
+          git push
