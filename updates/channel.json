@@ -1,8 +1,15 @@
 {
   "schema": 1,
-  "channel": "stable",
-  "repository": "thiagorls002-ui/promoagenda-updates",
-  "latest": null,
-  "status": "not-published",
-  "notes": "Nenhuma atualização está disponível até a publicação e verificação de uma versão assinada."
+  "version": "0.6.0",
+  "tag": "v0.6.0",
+  "apps": {
+    "1": {
+      "asset": "PromoAgenda-1.zip",
+      "sha256": "b857f4d6a78a46bbf3e2d8a7229f37776804ef448f78c53d2a3923342e9b793f"
+    },
+    "2": {
+      "asset": "PromoAgenda-2.zip",
+      "sha256": "add5fd61bd75954931ae60021b21bb33e2132f9fc210b9e63635009ca8ad412d"
+    }
+  }
 }
