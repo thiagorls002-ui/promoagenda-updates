@@ -1,15 +1,15 @@
 {
   "schema": 1,
-  "version": "0.6.0",
-  "tag": "v0.6.0",
+  "version": "0.7.0",
+  "tag": "v0.7.0",
   "apps": {
     "1": {
       "asset": "PromoAgenda-1.zip",
-      "sha256": "b857f4d6a78a46bbf3e2d8a7229f37776804ef448f78c53d2a3923342e9b793f"
+      "sha256": "dc0e485b5501e8871c5cf3b541ddb5e7474ab1c217eadfee37178ba6b753ada5"
     },
     "2": {
       "asset": "PromoAgenda-2.zip",
-      "sha256": "add5fd61bd75954931ae60021b21bb33e2132f9fc210b9e63635009ca8ad412d"
+      "sha256": "468dc74a1844707bf55d027bfb2be0caa2df9c017ba5d4090279b88f89102a39"
     }
   }
 }
